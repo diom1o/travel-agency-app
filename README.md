@@ -1,1 +1,1 @@
-# travel-agency-app
+TravelAgencyApp offers a seamless experience for travelers looking to explore new destinations. Our intuitive frontend allows users to effortlessly browse available tours, input booking details, and manage existing bookings with ease. Interacting with our backend through a robust API, the app ensures up-to-date information on tours and a straightforward booking process, making travel planning stress-free and enjoyable.
