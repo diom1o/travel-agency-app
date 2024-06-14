@@ -7,7 +7,9 @@ async function fetchAvailableTours() {
     const response = await axios.get(`${apiBaseUrl}/tours`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching tours', error);
+    const errorMessage = error.response && error.response.data ? `Error fetching tours: ${error.response.data.message}` : 'Error fetching tours';
+    console.error(errorMessage, error);
+    alert(errorMessage);
     throw error;
   }
 }
@@ -29,6 +31,10 @@ function renderTours(toursList) {
 function initiateTourBooking(tourId) {
   const userName = prompt('Enter your name:');
   const userEmail = prompt('Enter your email:');
+  if (!userName || !userEmail) {
+    alert('You must enter both name and email to book a tour!');
+    return;
+  }
   processTourBooking({ tourId, userName, userEmail });
 }
 
@@ -38,8 +44,9 @@ async function processTourBooking(bookingDetails) {
     alert('Booking successful!');
     console.log('Booking confirmation:', response.data);
   } catch (error) {
-    console.error('Error processing booking', error);
-    alert('There was an issue processing your booking.');
+    const errorMessage = error.response && error.response.data ? `Error processing booking: ${error.response.data.message}` : 'There was an issue processing your booking.';
+    console.error(errorMessage, error);
+    alert(errorMessage);
   }
 }
 
@@ -48,7 +55,9 @@ async function fetchUserBookings(userId) {
     const response = await axios.get(`${apiBaseUrl}/bookings/${userId}`);
     displayBookingsForUser(response.data);
   } catch (error) {
-    console.error('Error fetching user bookings', error);
+    const errorMessage = error.response && error.response.data ? `Error fetching user bookings: ${error.response.data.message}` : 'Error fetching user bookings';
+    console.error(errorMessage, error);
+    alert(errorMessage);
   }
 }
 
@@ -61,12 +70,15 @@ function displayBookingsForUser(bookingsList) {
       <h4>${booking.tourName}</h4>
       <p>Date: ${booking.date}</p>
     `;
-    bookingsContainer.appendChild(bookingItemElement);
+    bookingsContainer.appendChild(bookingItemDetail);
   });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  fetchAvailableTours().then(renderTours).catch(console.error);
+  fetchAvailableTours().then(renderTours).catch(error => {
+    console.error('Failed to fetch tours on document load', error);
+    alert('Failed to load tours. Please try refreshing the page.');
+  });
 });
 
 window.initiateTourBooking = initiateTourBooking;
