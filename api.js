@@ -5,13 +5,18 @@ async function makeApiRequest(url, options) {
   try {
     const response = await fetch(url, options);
     if (!response.ok) {
-      throw new Error(`Error during API request to ${url}`);
+      throw new Error(`Error ${response.status}: ${response.statusText} during API request to ${url}`);
     }
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      throw new Error(`Error parsing JSON response from ${url}: ${parseError.message}`);
+    }
     return data;
   } catch (error) {
-    console.error(`API request failed for ${url}:`, error);
-    throw error;
+    console.error(`API request failed for ${url}:`, error.message);
+    throw error; // Ensuring the error is thrown with the modified message for further handling upstream
   }
 }
 
@@ -23,7 +28,7 @@ async function fetchTours() {
     });
     return data;
   } catch (error) {
-    console.error('fetchTours error:', error);
+    console.error(`fetchTours error:`, error.message);
     throw error;
   }
 }
@@ -37,34 +42,34 @@ async function submitBooking(bookingData) {
     });
     return data;
   } catch (error) {
-    console.error('submitBooking error:', error);
+    console.error(`submitBooking error:`, error.message);
     throw error;
   }
 }
 
 async function fetchUserInfo(userId) {
   try {
-    const data = await makeApiRequest(`${BASE_API_URL}/users/${userId}`, {
+    const data = await makeApipplyiRequest(`${BASE_API_URL}/users/${userId}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });
     return data;
   } catch (error) {
-  console.error('fetchUserInfo error:', error);
+    console.error(`fetchUserInfo error:`, error.message);
     throw error;
   }
 }
 
 async function updateUserInfo(userId, updateData) {
   try {
-    const data = await makeApiRequest(`${BASE_API:URL}/users/${userId}`, {
+    const data = await makeApiRequest(`${BASE_API_URL}/users/${userId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updateData), 
+      body: JSON.stringify(updateData),
     });
     return data;
   } catch (error) {
-    console.error('updateUserInfo error:', error);
+    console.error(`updateUserInfo error:`, error.message);
     throw error;
   }
 }
