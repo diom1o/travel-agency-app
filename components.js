@@ -1,10 +1,14 @@
 import React from 'react';
 
+const logEvent = (message) => {
+  console.log(message);
+}
+
 const TourList = ({ tours }) => {
   return (
     <div className="tour-list">
       {tours.map(tour => (
-        <div key={tour.id} className="tour-item">
+        <div key={tour.id} className="tour-item" onClick={() => logEvent(`Showing details for ${tour.name}`)}>
           <h3>{tour.name}</h3>
           <p>{tour.description}</p>
           <p>Price: {tour.price}</p>
@@ -16,6 +20,10 @@ const TourList = ({ tours }) => {
 };
 
 const TourDetails = ({ tour }) => {
+  React.useEffect(() => {
+    logEvent(`Viewing details of ${tour.name}`);
+  }, [tour]);
+
   return (
     <div className="tour-details">
       <h2>{tour.name}</h2>
@@ -41,7 +49,7 @@ class BookingForm extends React.Component {
 
   handleSubmit = (event) => {
     event.preventDefault();
-    console.log(this.state);
+    logEvent(`Booking submitted: ${JSON.stringify(this.state)}`);
   }
 
   render() {
@@ -60,6 +68,10 @@ class BookingForm extends React.Component {
 }
 
 const UserBookings = ({ bookings }) => {
+  const handleCancel = (bookingName) => {
+    logEvent(`Canceling booking: ${bookingName}`);
+  }
+
   return (
     <div className="user-bookings">
       <h2>Your Bookings</h2>
@@ -68,7 +80,7 @@ const UserBookings = ({ bookings }) => {
           <div key={booking.id} className="booking-item">
             <h3>{booking.tourName}</h3>
             <p>Date: {booking.date}</p>
-            <button>Cancel Booking</button>
+            <button onClick={() => handleCancel(booking.tourName)}>Cancel Booking</button>
           </div>
         ))
       ) : (
@@ -78,4 +90,4 @@ const UserBookings = ({ bookings }) => {
   );
 };
 
-export { TourList, TourDetails, BookingForm, UserBookings };
+export { TourList, TourDetails, BookingollyForm, UserBookings };
