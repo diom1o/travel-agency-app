@@ -5,6 +5,10 @@ const logEvent = (message) => {
 }
 
 const TourList = ({ tours }) => {
+  if (!tours || tours.length === 0) {
+    return <p>Error: No tours data available.</p>;
+  }
+  
   return (
     <div className="tour-list">
       {tours.map(tour => (
@@ -21,8 +25,16 @@ const TourList = ({ tours }) => {
 
 const TourDetails = ({ tour }) => {
   React.useEffect(() => {
+    if (!tour) {
+      console.error("Error: Tour details are missing.");
+      return;
+    }
     logEvent(`Viewing details of ${tour.name}`);
   }, [tour]);
+
+  if (!tour) {
+    return <p>Error: No tour details found.</p>;
+  }
 
   return (
     <div className="tour-details">
@@ -49,6 +61,10 @@ class BookingForm extends React.Component {
 
   handleSubmit = (event) => {
     event.preventDefault();
+    if (this.state.name === '' || this.state.email === '' || this.state.date === '') {
+      console.error("Error: All fields are required to submit the booking.");
+      return;
+    }
     logEvent(`Booking submitted: ${JSON.stringify(this.state)}`);
   }
 
@@ -72,22 +88,22 @@ const UserBookings = ({ bookings }) => {
     logEvent(`Canceling booking: ${bookingName}`);
   }
 
+  if (!bookings || bookings.length === 0) {
+    return <p>No bookings found.</p>;
+  }
+
   return (
     <div className="user-bookings">
       <h2>Your Bookings</h2>
-      {bookings.length > 0 ? (
-        bookings.map(booking => (
-          <div key={booking.id} className="booking-item">
-            <h3>{booking.tourName}</h3>
-            <p>Date: {booking.date}</p>
-            <button onClick={() => handleCancel(booking.tourName)}>Cancel Booking</button>
-          </div>
-        ))
-      ) : (
-        <p>No bookings found.</p>
-      )}
+      {bookings.map(booking => (
+        <div key={booking.id} className="booking-item">
+          <h3>{booking.tourName}</h3>
+          <p>Date: {booking.date}</p>
+          <button onClick={() => handleCancel(booking.tourName)}>Cancel Booking</button>
+        </div>
+      ))}
     </div>
   );
 };
 
-export { TourList, TourDetails, BookingollyForm, UserBookings };
+export { TourList, TourDetails, BookingForm, UserBookings };
