@@ -1,18 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const logEvent = (message) => {
   console.log(message);
-}
+};
 
 const TourList = ({ tours }) => {
+  const handleItemClick = useCallback((tourName) => logEvent(`Showing details for ${tourName}`), []);
+
   if (!tours || tours.length === 0) {
     return <p>Error: No tours data available.</p>;
   }
-  
+
   return (
     <div className="tour-list">
-      {tours.map(tour => (
-        <div key={tour.id} className="tour-item" onClick={() => logEvent(`Showing details for ${tour.name}`)}>
+      {tours.map((tour) => (
+        <div key={tour.id} className="tour-item" onClick={() => handleItemClick(tour.name)}>
           <h3>{tour.name}</h3>
           <p>{tour.description}</p>
           <p>Price: {tour.price}</p>
@@ -24,7 +26,7 @@ const TourList = ({ tours }) => {
 };
 
 const TourDetails = ({ tour }) => {
-  React.useEffect(() => {
+  useEffect(() => {
     if (!tour) {
       console.error("Error: Tour details are missing.");
       return;
@@ -47,46 +49,44 @@ const TourDetails = ({ tour }) => {
   );
 };
 
-class BookingForm extends React.Component {
-  state = {
+const BookingForm = ({ tourId }) => {
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
-    tourId: this.props.tourId,
-    date: ''
-  };
+    tourId: tourId,
+    date: '',
+  });
 
-  handleChange = (event) => {
-    this.setState({ [event.target.name]: event.target.value });
-  }
+  const handleChange = useCallback((event) => {
+    setFormData({ ...formData, [event.target.name]: event.target.value });
+  }, [formData]);
 
-  handleSubmit = (event) => {
+  const handleSubmit = useCallback((event) => {
     event.preventDefault();
-    if (this.state.name === '' || this.state.email === '' || this.state.date === '') {
+    if (formData.name === '' || formData.email === '' || formData.date === '') {
       console.error("Error: All fields are required to submit the booking.");
       return;
     }
-    logEvent(`Booking submitted: ${JSON.stringify(this.state)}`);
-  }
+    logEvent(`Booking submitted: ${JSON.stringify(formData)}`);
+  }, [formData]);
 
-  render() {
-    return (
-      <form onSubmit={this.handleSubmit} className="booking-form">
-        <label>Name:</label>
-        <input type="text" name="name" value={this.state.name} onChange={this.handleChange} />
-        <label>Email:</label>
-        <input type="email" name="email" value={this.state.email} onChange={this.handleChange} />
-        <label>Date:</label>
-        <input type="date" name="date" value={this.state.date} onChange={this.handleChange} />
-        <button type="submit">Submit</button>
-      </form>
-    );
-  }
-}
+  return (
+    <form onSubmit={handleSubmit} className="booking-form">
+      <label>Name:</label>
+      <input type="text" name="name" value={formData.name} onChange={handleChange} />
+      <label>Email:</label>
+      <input type="email" name="email" value={formData.email} onChange={handleChange} />
+      <label>Date:</label>
+      <input type="date" name="date" value={formData.date} onChange={handleChange} />
+      <button type="submit">Submit</button>
+    </form>
+  );
+};
 
 const UserBookings = ({ bookings }) => {
-  const handleCancel = (bookingName) => {
+  const handleCancel = useCallback((bookingName) => {
     logEvent(`Canceling booking: ${bookingName}`);
-  }
+  }, []);
 
   if (!bookings || bookings.length === 0) {
     return <p>No bookings found.</p>;
@@ -95,7 +95,7 @@ const UserBookings = ({ bookings }) => {
   return (
     <div className="user-bookings">
       <h2>Your Bookings</h2>
-      {bookings.map(booking => (
+      {bookings.map((booking) => (
         <div key={booking.id} className="booking-item">
           <h3>{booking.tourName}</h3>
           <p>Date: {booking.date}</p>
