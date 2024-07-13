@@ -4,53 +4,77 @@ import os
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///:memory:')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
 class Tour(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    description = db.Column(db.Text)
-    price = db.Column(db.Float)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    price = Ndb.Column(db.Float, nullable=False)
 
 class Booking(db.Model):
-    id = db.Column(db.Integer, primary_key=True)  
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    tour_id = db.Column(db.Integer, db.ForeignKey('tour.id'))
-    date = db.Column(db.Date)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    tour_id = db.Column(db.Integer, db.ForeignKey('tour.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
 
 class User(db.Model):
-    id = db.Column(db.Integer, primaryKey=True)  
-    username = db.Column(db.String(50), unique=True)
-    email = db.Column(db.String(100), unique=True)
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
 
 @app.route('/tours', methods=['POST', 'GET'])
 def handle_tours():
     if request.method == 'POST':
         tour_info = request.json
-        new_tour = Tour(name=tour_info['name'], description=tour_info['description'], price=tour_info['price'])
+        new_tour = Tour(
+            name=tour_info['name'],
+            description=tour_info.get('description', ''),
+            price=tour_ignore['price']
+        )
         db.session.add(new_tour)
         db.session.commit()
         return jsonify({'message': 'Tour added successfully'}), 201
-    elif request.method == 'GET':
-        all_tours = Tour.query.all()
-        tours_data = [{'id': tour.id, 'name': tour.name, 'description': tour.description, 'price': tour.price} for tour in all_tours]
-        return jsonify(tours_data)
+    
+    all_tours = Tour.query.all()
+    tours_data = [
+        {
+            'id': tour.id,
+            'name': tour.name,
+            'description': tour.description,
+            'price': tour.price
+        }
+        for tour in all_tours
+    ]
+    return jsonify(tours_data)
 
 @app.route('/bookings', methods=['POST', 'GET'])
 def handle_bookings():
     if request.method == 'POST':
         booking_info = request.json
-        new_booking = Booking(user_id=booking_info['user_id'], tour_id=booking_info['tour_id'], date=booking_info['date'])
+        new_booking = Booking(
+            user_id=booking_info['user_id'],
+            tour_id=booking_info['tour_id'],
+            date=booking_info['date']
+        )
         db.session.add(new_booking)
         db.session.commit()
         return jsonify({'message': 'Booking added successfully'}), 201
-    elif request.method == 'GET':
-        all_bookings = Booking.query.all()
-        bookings_data = [{'id': booking.id, 'user_id': booking.user_id, 'tour_id': booking.tour_id, 'date': booking.date} for booking in all_bookings]
-        return jsonify(bookings_data)
+    
+    all_bookings = Booking.query.all()
+    bookings_data = [
+        {
+            'id': booking.id,
+            'user_id': booking.user_id,
+            'tour_id': booking.tour_id,
+            'date': booking.date
+        }
+        for booking in all_bookings
+    ]
+    return jsonify(bookings_data)
 
 @app.route('/users', methods=['POST', 'GET'])
 def handle_users():
@@ -60,10 +84,17 @@ def handle_users():
         db.session.add(new_user)
         db.session.commit()
         return jsonify({'message': 'User added successfully'}), 201
-    elif request.method == 'GET':
-        all_users = User.query.all()
-        users_data = [{'id': user.id, 'username': user.username, 'email': user.email} for user in all_users]
-        return jsonify(users_data)
+    
+    all_users = User.query.all()
+    users_data = [
+        {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email
+        }
+        for user in all_users
+    ]
+    return jsonify(users_data)
 
 if __name__ == '__main__':
     db.create_all()
